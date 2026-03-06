@@ -1,0 +1,574 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated_lib/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Talep {
+  id             Int           @id @default(autoincrement())
+  tarih          DateTime      @default(now())
+  barkod         String        @unique
+  konu           String
+  gerekce        String
+  durum          String        @default("TASLAK")
+  ilgiliKisiId   Int
+  birimId        Int?
+  bildirimEmail  String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  rfqKalemler    RFQKalem[]
+  siparis        Siparis?
+  birim          Birim?        @relation("TalepBirimi", fields: [birimId], references: [id])
+  ilgiliKisi     Personel      @relation("TalepSahibi", fields: [ilgiliKisiId], references: [id])
+  sorumlu        User?         @relation("TalepSorumlusu", fields: [sorumluId], references: [id])
+  sorumluId      String?
+  kalemler       TalepKalem[]
+  teklifler      Teklif[]
+  teklifTokenlar TeklifToken[]
+}
+
+model TalepKalem {
+  id             Int           @id @default(autoincrement())
+  aciklama       String
+  detay          String?
+  miktar         Float
+  birim          String
+  talepId        Int
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  rfqKalemler    RFQKalem[]
+  talep          Talep         @relation(fields: [talepId], references: [id], onDelete: Cascade)
+  teklifKalemler TeklifKalem[]
+}
+
+model Siparis {
+  id                      Int                           @id @default(autoincrement())
+  tarih                   DateTime                      @default(now())
+  barkod                  String                        @unique
+  aciklama                String?
+  durum                   String                        @default("BEKLEMEDE")
+  talepId                 Int                           @unique
+  birimId                 Int
+  yonetmelikId            Int
+  alimYontemiId           Int
+  tedarikciId             Int?
+  degerlendirmeFormTipiId Int?
+  rfqId                   Int?
+  teklifId                Int?
+  createdAt               DateTime                      @default(now())
+  updatedAt               DateTime                      @updatedAt
+  degerlendirmeToken      DegerlendirmeToken?
+  faturalar               Fatura[]
+  odemePlani              OdemePlani[]
+  alimYontemi             AlimYontemi                   @relation(fields: [alimYontemiId], references: [id])
+  birim                   Birim                         @relation(fields: [birimId], references: [id])
+  degerlendirmeFormTipi   DegerlendirmeFormuTipi?       @relation(fields: [degerlendirmeFormTipiId], references: [id])
+  rfq                     RFQ?                          @relation(fields: [rfqId], references: [id])
+  talep                   Talep                         @relation(fields: [talepId], references: [id])
+  tedarikci               Tedarikci?                    @relation(fields: [tedarikciId], references: [id])
+  teklifKabul             Teklif?                       @relation("KabulEdilenTeklif", fields: [teklifId], references: [id])
+  yonetmelik              Yonetmelik                    @relation(fields: [yonetmelikId], references: [id])
+  kalemSecimleri          SiparisKalemSecimi[]
+  sozlesmeler             Sozlesme[]
+  degerlendirmeler        TedarikciDegerlendirme[]
+  degerlendirmeFormlari   TedarikciDegerlendirmeFormu[] @relation("SiparisDegerlendirmeFormlar")
+}
+
+model DegerlendirmeToken {
+  id         Int      @id @default(autoincrement())
+  token      String   @unique
+  siparisId  Int      @unique
+  kullanildi Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  siparis    Siparis  @relation(fields: [siparisId], references: [id], onDelete: Cascade)
+}
+
+model Fatura {
+  id          Int      @id @default(autoincrement())
+  faturaNo    String   @unique
+  tutar       Decimal  @db.Decimal(18, 2)
+  vadeTarihi  DateTime
+  odemeDurumu String   @default("ODENMEDI")
+  siparisId   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  siparis     Siparis  @relation(fields: [siparisId], references: [id])
+}
+
+model Sozlesme {
+  id              Int      @id @default(autoincrement())
+  sozlesmeNo      String   @unique
+  baslangicTarihi DateTime
+  bitisTarihi     DateTime
+  dosyaYolu       String?
+  siparisId       Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  siparis         Siparis  @relation(fields: [siparisId], references: [id])
+}
+
+model Personel {
+  id                Int      @id @default(autoincrement())
+  adSoyad           String
+  unvan             String?
+  email             String?
+  telefon           String?
+  aktif             Boolean  @default(true)
+  birimId           Int?
+  isBirimYoneticisi Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  birim             Birim?   @relation("BirimPersoneli", fields: [birimId], references: [id])
+  olusturulanRFQler RFQ[]
+  talepler          Talep[]  @relation("TalepSahibi")
+  user              User?
+}
+
+model Birim {
+  id          Int        @id @default(autoincrement())
+  ad          String     @unique
+  email       String?
+  createdAt   DateTime   @default(now())
+  personeller Personel[] @relation("BirimPersoneli")
+  siparisler  Siparis[]
+  talepler    Talep[]    @relation("TalepBirimi")
+}
+
+model Yonetmelik {
+  id         Int       @id @default(autoincrement())
+  madde      String    @unique
+  aciklama   String?
+  createdAt  DateTime  @default(now())
+  siparisler Siparis[]
+}
+
+model AlimYontemi {
+  id         Int       @id @default(autoincrement())
+  ad         String    @unique
+  createdAt  DateTime  @default(now())
+  siparisler Siparis[]
+}
+
+model Tedarikci {
+  id                    Int                           @id @default(autoincrement())
+  ad                    String                        @unique
+  yetkiliKisi           String?
+  telefon               String?
+  email                 String?
+  adres                 String?
+  vergiNo               String?
+  vergiDairesi          String?
+  aktif                 Boolean                       @default(true)
+  durum                 TedarikciDurum                @default(BEKLIYOR)
+  basvuruTarihi         DateTime?
+  onayTarihi            DateTime?
+  onaylayanId           String?
+  logo                  String?
+  aciklama              String?
+  kategoriId            Int?
+  createdAt             DateTime                      @default(now())
+  updatedAt             DateTime                      @updatedAt
+  rfqTedarikcilar       RFQTedarikci[]
+  siparislar            Siparis[]
+  kategori              TedarikciKategori?            @relation(fields: [kategoriId], references: [id])
+  degerlendirmeler      TedarikciDegerlendirme[]
+  degerlendirmeFormlari TedarikciDegerlendirmeFormu[]
+  teklifler             Teklif[]
+  teklifTokenlar        TeklifToken[]
+  belgeler              TedarikciBelge[]
+  ibanlar               TedarikciIban[]
+  onaylayan             User?                         @relation("TedarikciOnaylayan", fields: [onaylayanId], references: [id])
+  users                 User[]                        @relation("TedarikciUsers")
+  kategoriler           TedarikciKategori[]           @relation("TedarikciKategorileri")
+  kategoriIstekleri     TedarikciKategoriOnay[]
+}
+
+model TedarikciKategori {
+  id              Int                     @id @default(autoincrement())
+  ad              String                  @unique
+  aciklama        String?
+  aktif           Boolean                 @default(true)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  rfqler          RFQ[]
+  tedarikciler    Tedarikci[]
+  tedarikcilerRel Tedarikci[]             @relation("TedarikciKategorileri")
+  onaylar         TedarikciKategoriOnay[]
+}
+
+enum KategoriOnayDurum {
+  BEKLIYOR
+  ONAYLANDI
+  REDDEDILDI
+}
+
+model TedarikciKategoriOnay {
+  id          Int               @id @default(autoincrement())
+  tedarikciId Int
+  kategoriId  Int
+  durum       KategoriOnayDurum @default(BEKLIYOR)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  tedarikci   Tedarikci         @relation(fields: [tedarikciId], references: [id], onDelete: Cascade)
+  kategori    TedarikciKategori @relation(fields: [kategoriId], references: [id], onDelete: Cascade)
+
+  @@unique([tedarikciId, kategoriId])
+}
+
+model TedarikciDegerlendirme {
+  id            Int       @id @default(autoincrement())
+  tarih         DateTime  @default(now())
+  teslimatPuani Int
+  kalitePuani   Int
+  fiyatPuani    Int
+  iletisimPuani Int
+  genelPuan     Float
+  yorum         String?
+  tedarikciId   Int
+  siparisId     Int?
+  createdAt     DateTime  @default(now())
+  siparis       Siparis?  @relation(fields: [siparisId], references: [id])
+  tedarikci     Tedarikci @relation(fields: [tedarikciId], references: [id])
+}
+
+model DegerlendirmeFormuTipi {
+  id         Int                           @id @default(autoincrement())
+  ad         String                        @unique
+  aciklama   String?
+  aktif      Boolean                       @default(true)
+  createdAt  DateTime                      @default(now())
+  updatedAt  DateTime                      @updatedAt
+  gruplar    DegerlendirmeGrubu[]
+  siparisler Siparis[]
+  formlar    TedarikciDegerlendirmeFormu[]
+}
+
+model DegerlendirmeGrubu {
+  id         Int                    @id @default(autoincrement())
+  kod        String
+  ad         String
+  agirlik    Int
+  sira       Int                    @default(0)
+  formTipiId Int
+  createdAt  DateTime               @default(now())
+  formTipi   DegerlendirmeFormuTipi @relation(fields: [formTipiId], references: [id], onDelete: Cascade)
+  sorular    DegerlendirmeSorusu[]
+}
+
+model DegerlendirmeSorusu {
+  id        Int                   @id @default(autoincrement())
+  kod       String
+  soru      String
+  sira      Int                   @default(0)
+  grupId    Int
+  createdAt DateTime              @default(now())
+  cevaplar  DegerlendirmeCevabi[]
+  grup      DegerlendirmeGrubu    @relation(fields: [grupId], references: [id], onDelete: Cascade)
+}
+
+model DegerlendirmeCevabi {
+  id       Int                         @id @default(autoincrement())
+  puan     Int
+  aciklama String?
+  soruId   Int
+  formId   Int
+  form     TedarikciDegerlendirmeFormu @relation(fields: [formId], references: [id], onDelete: Cascade)
+  soru     DegerlendirmeSorusu         @relation(fields: [soruId], references: [id], onDelete: Cascade)
+}
+
+model TedarikciDegerlendirmeFormu {
+  id            Int                    @id @default(autoincrement())
+  tarih         DateTime               @default(now())
+  degerlendiren String
+  tedarikciId   Int
+  formTipiId    Int
+  siparisId     Int?
+  genelPuan     Float
+  sonuc         String
+  createdAt     DateTime               @default(now())
+  cevaplar      DegerlendirmeCevabi[]
+  formTipi      DegerlendirmeFormuTipi @relation(fields: [formTipiId], references: [id])
+  siparis       Siparis?               @relation("SiparisDegerlendirmeFormlar", fields: [siparisId], references: [id])
+  tedarikci     Tedarikci              @relation(fields: [tedarikciId], references: [id])
+}
+
+model SystemSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model TeklifToken {
+  id               Int           @id @default(autoincrement())
+  token            String        @unique
+  talepId          Int
+  tedarikciId      Int
+  rfqTedarikciId   Int?          @unique
+  olusturmaTarihi  DateTime      @default(now())
+  sonGecerlilik    DateTime
+  kullanildiMi     Boolean       @default(false)
+  kullanilmaTarihi DateTime?
+  teklifler        Teklif[]
+  rfqTedarikci     RFQTedarikci? @relation(fields: [rfqTedarikciId], references: [id])
+  talep            Talep         @relation(fields: [talepId], references: [id], onDelete: Cascade)
+  tedarikci        Tedarikci     @relation(fields: [tedarikciId], references: [id], onDelete: Cascade)
+}
+
+model Teklif {
+  id                 Int                  @id @default(autoincrement())
+  tokenId            Int?
+  talepId            Int
+  tedarikciId        Int?
+  hariciTedarikciAdi String?
+  toplamTutar        Decimal              @db.Decimal(18, 2)
+  paraBirimi         String               @default("TRY")
+  teslimSuresi       Int
+  gecerlilikSuresi   Int
+  notlar             String?
+  olusturmaTarihi    DateTime             @default(now())
+  durum              String               @default("BEKLEMEDE")
+  turNo              Int                  @default(1)
+  vadeGun            Int                  @default(0)
+  rfqId              Int?
+  odemePlani         OdemePlani[]
+  siparisKabul       Siparis[]            @relation("KabulEdilenTeklif")
+  kalemSecimleri     SiparisKalemSecimi[]
+  rfq                RFQ?                 @relation(fields: [rfqId], references: [id])
+  talep              Talep                @relation(fields: [talepId], references: [id], onDelete: Cascade)
+  tedarikci          Tedarikci?           @relation(fields: [tedarikciId], references: [id], onDelete: Cascade)
+  token              TeklifToken?         @relation(fields: [tokenId], references: [id])
+  kalemler           TeklifKalem[]
+}
+
+model OdemePlani {
+  id        Int      @id @default(autoincrement())
+  oran      Float
+  vadeGun   Int
+  aciklama  String?
+  teklifId  Int?
+  siparisId Int?
+  createdAt DateTime @default(now())
+  siparis   Siparis? @relation(fields: [siparisId], references: [id], onDelete: Cascade)
+  teklif    Teklif?  @relation(fields: [teklifId], references: [id], onDelete: Cascade)
+}
+
+model TeklifKalem {
+  id           Int        @id @default(autoincrement())
+  teklifId     Int
+  talepKalemId Int
+  rfqKalemId   Int?
+  birimFiyat   Decimal    @db.Decimal(18, 2)
+  rfqKalem     RFQKalem?  @relation(fields: [rfqKalemId], references: [id])
+  talepKalem   TalepKalem @relation(fields: [talepKalemId], references: [id], onDelete: Cascade)
+  teklif       Teklif     @relation(fields: [teklifId], references: [id], onDelete: Cascade)
+}
+
+model RFQ {
+  id                Int                @id @default(autoincrement())
+  rfqNo             String             @unique
+  baslik            String
+  aciklama          String?
+  olusturmaTarihi   DateTime           @default(now())
+  sonTeklifTarihi   DateTime
+  durum             String             @default("TASLAK")
+  mevcutTur         Int                @default(1)
+  maksimumTur       Int                @default(3)
+  turBitisTarihi    DateTime?
+  turDurumu         String             @default("AKTIF")
+  agirlikFiyat      Int                @default(100)
+  agirlikVade       Int                @default(0)
+  agirlikTeslimat   Int                @default(0)
+  agirlikPerformans Int                @default(0)
+  olusturanId       Int
+  kategoriId        Int?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  kategori          TedarikciKategori? @relation(fields: [kategoriId], references: [id])
+  olusturan         Personel           @relation(fields: [olusturanId], references: [id])
+  kalemler          RFQKalem[]
+  tedarikciler      RFQTedarikci[]
+  siparisler        Siparis[]
+  teklifler         Teklif[]
+}
+
+model RFQKalem {
+  id              Int                 @id @default(autoincrement())
+  rfqId           Int
+  talepId         Int
+  talepKalemId    Int
+  miktar          Float?
+  bolunebilir     Boolean             @default(true)
+  createdAt       DateTime            @default(now())
+  rfq             RFQ                 @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  talep           Talep               @relation(fields: [talepId], references: [id])
+  talepKalem      TalepKalem          @relation(fields: [talepKalemId], references: [id])
+  siparisSecimi   SiparisKalemSecimi?
+  teklifKalemleri TeklifKalem[]
+}
+
+model RFQTedarikci {
+  id             Int          @id @default(autoincrement())
+  rfqId          Int
+  tedarikciId    Int
+  gonderimTarihi DateTime?
+  durum          String       @default("BEKLIYOR")
+  createdAt      DateTime     @default(now())
+  rfq            RFQ          @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  tedarikci      Tedarikci    @relation(fields: [tedarikciId], references: [id])
+  teklifToken    TeklifToken?
+}
+
+model SiparisKalemSecimi {
+  id         Int      @id @default(autoincrement())
+  rfqKalemId Int      @unique
+  teklifId   Int
+  siparisId  Int?
+  createdAt  DateTime @default(now())
+  rfqKalem   RFQKalem @relation(fields: [rfqKalemId], references: [id])
+  siparis    Siparis? @relation(fields: [siparisId], references: [id])
+  teklif     Teklif   @relation(fields: [teklifId], references: [id])
+}
+
+model Attachment {
+  id            Int      @id @default(autoincrement())
+  fileName      String
+  filePath      String
+  fileType      String
+  fileSize      Int
+  relatedEntity String
+  entityId      Int
+  createDate    DateTime @default(now())
+
+  @@index([relatedEntity, entityId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  type      String
+  link      String?
+  isRead    Boolean  @default(false)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                     String           @id @default(cuid())
+  name                   String?
+  email                  String?          @unique
+  emailVerified          DateTime?
+  image                  String?
+  password               String?
+  role                   String           @default("USER")
+  personelId             Int?             @unique
+  tedarikciId            Int?
+  isTedarikciAdmin       Boolean          @default(false)
+  createDate             DateTime         @default(now())
+  accounts               Account[]
+  sessions               Session[]
+  personel               Personel?        @relation(fields: [personelId], references: [id], onDelete: Cascade)
+  tedarikci              Tedarikci?       @relation("TedarikciUsers", fields: [tedarikciId], references: [id])
+  zimmetliTalepler       Talep[]          @relation("TalepSorumlusu")
+  gonderilenDavetler     TedarikciDavet[] @relation("DavetGonderenUser")
+  onayladigiTedarikciler Tedarikci[]      @relation("TedarikciOnaylayan")
+  notifications          Notification[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ==========================================
+// TEDARİKÇİ PORTALI - YENİ MODELLER
+// ==========================================
+
+enum TedarikciDurum {
+  BEKLIYOR
+  AKTIF
+  PASIF
+  REDDEDILDI
+}
+
+enum DavetDurum {
+  BEKLIYOR
+  KULLANILDI
+  IPTAL_EDILDI
+  SURESI_DOLDU
+}
+
+enum BelgeTuru {
+  VERGI_LEVHASI
+  ISO_BELGESI
+  IMZA_SIRKULERI
+  TICARET_SICIL
+  DIGER
+}
+
+model TedarikciDavet {
+  id                Int        @id @default(autoincrement())
+  email             String
+  firmaAdi          String?
+  kategoriler       Json?
+  token             String     @unique
+  davetEdenId       String
+  davetTarihi       DateTime   @default(now())
+  sonKullanmaTarihi DateTime
+  durum             DavetDurum @default(BEKLIYOR)
+  kullanilanTarih   DateTime?
+  davetEden         User       @relation("DavetGonderenUser", fields: [davetEdenId], references: [id])
+}
+
+model TedarikciBelge {
+  id            Int       @id @default(autoincrement())
+  tedarikciId   Int
+  tur           BelgeTuru
+  dosyaAdi      String
+  dosyaUrl      String
+  yuklemeTarihi DateTime  @default(now())
+  tedarikci     Tedarikci @relation(fields: [tedarikciId], references: [id], onDelete: Cascade)
+}
+
+model TedarikciIban {
+  id          Int       @id @default(autoincrement())
+  tedarikciId Int
+  bankaAdi    String
+  iban        String
+  varsayilan  Boolean   @default(false)
+  tedarikci   Tedarikci @relation(fields: [tedarikciId], references: [id], onDelete: Cascade)
+}

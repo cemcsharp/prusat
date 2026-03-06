@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRU Satınalma Platformu - Yönetim Sunumu</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .slide {
+            display: none;
+            min-height: 100vh;
+            padding: 60px 80px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Cover Slide */
+        .cover {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+        }
+
+        .cover .logo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #8b5cf6, #a855f7, #6366f1);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.4);
+        }
+
+        .cover h1 {
+            font-size: 64px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(to right, #c4b5fd, #a78bfa, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cover h2 {
+            font-size: 24px;
+            font-weight: 400;
+            color: #94a3b8;
+            margin-bottom: 60px;
+        }
+
+        .cover .info {
+            font-size: 14px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        /* Content Slides */
+        .content-slide {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .slide-header {
+            margin-bottom: 50px;
+        }
+
+        .slide-header h2 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .slide-header .gradient-text {
+            background: linear-gradient(to right, #c4b5fd, #a78bfa, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .slide-header p {
+            font-size: 18px;
+            color: #94a3b8;
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            flex: 1;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            flex: 1;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(139, 92, 246, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .card .icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #e2e8f0;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* Problem cards */
+        .problem-card {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .problem-card .icon {
+            color: #ef4444;
+        }
+
+        /* Solution cards */
+        .solution-card {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.2);
+        }
+
+        .solution-card .icon {
+            color: #22c55e;
+        }
+
+        /* Feature cards */
+        .feature-card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.1));
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+
+        /* Stats */
+        .stat {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .stat .number {
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(to right, #8b5cf6, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat .label {
+            font-size: 16px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 12px;
+        }
+
+        /* Table */
+        .table-wrapper {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 20px 24px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            background: rgba(139, 92, 246, 0.2);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #c4b5fd;
+        }
+
+        td {
+            font-size: 15px;
+            color: #e2e8f0;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* CTA Slide */
+        .cta-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+        }
+
+        .cta-slide h2 {
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 24px;
+        }
+
+        .cta-slide p {
+            font-size: 20px;
+            color: #94a3b8;
+            margin-bottom: 50px;
+            max-width: 600px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 16px 32px;
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .nav button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav button:hover {
+            background: rgba(139, 92, 246, 0.5);
+        }
+
+        .nav .progress {
+            font-size: 14px;
+            color: #94a3b8;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: #8b5cf6;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        /* Checklist */
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 18px;
+            color: #e2e8f0;
+        }
+
+        .check-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(34, 197, 94, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #22c55e;
+        }
+
+        /* Keyboard hint */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #475569;
+        }
+
+        kbd {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin: 0 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Slide 1: Cover -->
+    <section class="slide cover active" data-slide="1">
+        <div class="logo">PRU</div>
+        <h1>PRU Satınalma Platformu</h1>
+        <h2>Kurumsal Tedarik Yönetim Sistemi</h2>
+        <p class="info">Piri Reis Üniversitesi • 2026</p>
+    </section>
+
+    <!-- Slide 2: Problem -->
+    <section class="slide content-slide" data-slide="2">
+        <div class="slide-header">
+            <h2><span class="gradient-text">Mevcut Durum</span></h2>
+            <p>Karşılaştığımız temel zorluklar</p>
+        </div>
+        <div class="grid-3">
+            <div class="card problem-card">
+                <div class="icon">📧</div>
+                <h3>E-posta Karmaşası</h3>
+                <p>Talepler ve teklifler e-posta ile takip ediliyor. Kayıp, gecikme ve karmaşa yaşanıyor.</p>
+            </div>
+            <div class="card problem-card">
+                <div class="icon">📊</div>
+                <h3>Excel Dosyaları</h3>
+                <p>Versiyon karmaşası, paylaşım zorluğu, tek merkez yok.</p>
+            </div>
+            <div class="card problem-card">
+                <div class="icon">⏱️</div>
+                <h3>Zaman Kaybı</h3>
+                <p>Manuel teklif toplama, karşılaştırma ve onay süreçleri uzun sürüyor.</p>
+            </div>
+            <div class="card problem-card">
+                <div class="icon">🔍</div>
+                <h3>Şeffaflık Eksikliği</h3>
+                <p>Süreçlerin hangi aşamada olduğu belirsiz. Takip zorlaşıyor.</p>
+            </div>
+            <div class="card problem-card">
+                <div class="icon">📋</div>
+                <h3>Denetim Zorluğu</h3>
+                <p>Geçmiş işlemler, kararlar ve belgeler dağınık. Raporlama yok.</p>
+            </div>
+            <div class="card problem-card">
+                <div class="icon">🏢</div>
+                <h3>Tedarikçi Takibi</h3>
+                <p>Firma bilgileri, performans ve geçmiş siparişler kayıt altında değil.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: Solution -->
+    <section class="slide content-slide" data-slide="3">
+        <div class="slide-header">
+            <h2><span class="gradient-text">Çözüm: PRU Satınalma</span></h2>
+            <p>Tüm satınalma süreçleri tek platformda</p>
+        </div>
+        <div class="grid-2">
+            <div>
+                <div class="checklist">
+                    <div class="check-item">
+                        <span class="check-icon">✓</span>
+                        Talep → Teklif → Sipariş → Teslimat akışı
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">✓</span>
+                        Rol bazlı erişim kontrolü
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">✓</span>
+                        Tedarikçilere otomatik teklif isteği (RFQ)
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">✓</span>
+                        Karşılaştırmalı teklif değerlendirme
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">✓</span>
+                        Dijital sözleşme ve dosya arşivi
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">✓</span>
+                        Fatura ve ödeme takibi
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">✓</span>
+                        PDF rapor ve analitik
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <div class="card feature-card" style="text-align: center; padding: 60px 40px;">
+                    <div class="icon" style="font-size: 80px; margin-bottom: 30px;">🚀</div>
+                    <h3 style="font-size: 28px; margin-bottom: 16px;">Web Tabanlı</h3>
+                    <p style="font-size: 16px;">Kurulum gerektirmez, tarayıcıdan erişim</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 4: Features -->
+    <section class="slide content-slide" data-slide="4">
+        <div class="slide-header">
+            <h2><span class="gradient-text">Temel Özellikler</span></h2>
+            <p>6 entegre modül ile kapsamlı çözüm</p>
+        </div>
+        <div class="grid-3">
+            <div class="card feature-card">
+                <div class="icon">📋</div>
+                <h3>Talep Yönetimi</h3>
+                <p>Birimlerden gelen tüm satınalma taleplerini tek noktadan takip edin.</p>
+            </div>
+            <div class="card feature-card">
+                <div class="icon">📨</div>
+                <h3>RFQ & Teklif</h3>
+                <p>Tedarikçilere otomatik teklif isteği gönderin, yanıtları karşılaştırın.</p>
+            </div>
+            <div class="card feature-card">
+                <div class="icon">🏢</div>
+                <h3>Tedarikçi Portali</h3>
+                <p>Firma bilgileri, performans puanları ve geçmiş işlemler.</p>
+            </div>
+            <div class="card feature-card">
+                <div class="icon">📄</div>
+                <h3>Sözleşme Yönetimi</h3>
+                <p>Tüm sözleşmeleri dijital ortamda saklayın ve takip edin.</p>
+            </div>
+            <div class="card feature-card">
+                <div class="icon">💰</div>
+                <h3>Finans Takibi</h3>
+                <p>Fatura, ödeme planları ve vade takibi ile nakit akışı kontrolü.</p>
+            </div>
+            <div class="card feature-card">
+                <div class="icon">📊</div>
+                <h3>Raporlar</h3>
+                <p>PDF export, analitik dashboard ve KPI takibi.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 5: Benefits -->
+    <section class="slide content-slide" data-slide="5">
+        <div class="slide-header">
+            <h2><span class="gradient-text">Faydalar</span></h2>
+            <p>Somut kazanımlar</p>
+        </div>
+        <div class="grid-3" style="align-items: start;">
+            <div class="card solution-card stat">
+                <div class="number">%50</div>
+                <div class="label">Süreç Hızlanması</div>
+            </div>
+            <div class="card solution-card stat">
+                <div class="number">%100</div>
+                <div class="label">Dijital Kayıt</div>
+            </div>
+            <div class="card solution-card stat">
+                <div class="number">7/24</div>
+                <div class="label">Erişilebilirlik</div>
+            </div>
+        </div>
+        <div class="grid-2" style="margin-top: 40px;">
+            <div class="card">
+                <h3 style="color: #22c55e; margin-bottom: 16px;">💰 Maliyet Kontrolü</h3>
+                <p>Karşılaştırmalı teklif analizi ile en uygun fiyatı bulun. Bütçe aşımlarını önleyin.</p>
+            </div>
+            <div class="card">
+                <h3 style="color: #22c55e; margin-bottom: 16px;">🔍 Tam Şeffaflık</h3>
+                <p>Her işlem kayıt altında. Kim, ne zaman, ne yaptı - anlık izlenebilirlik.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 6: Roles -->
+    <section class="slide content-slide" data-slide="6">
+        <div class="slide-header">
+            <h2><span class="gradient-text">Kullanıcı Rolleri</span></h2>
+            <p>Her kullanıcı kendi yetkisi dahilinde işlem yapar</p>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rol</th>
+                        <th>Yetkiler</th>
+                        <th>Hedef Kullanıcı</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Birim Personeli</strong></td>
+                        <td>Talep oluşturma, birim taleplerini görme</td>
+                        <td>Tüm departmanlar</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Birim Yöneticisi</strong></td>
+                        <td>Talep onaylama, birim takibi</td>
+                        <td>Müdürler</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Satınalma</strong></td>
+                        <td>Teklif toplama, sipariş oluşturma, tedarikçi yönetimi</td>
+                        <td>Satınalma birimi</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Finans</strong></td>
+                        <td>Fatura takibi, ödeme planı, finansal raporlar</td>
+                        <td>Muhasebe/Finans</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Admin</strong></td>
+                        <td>Tam yetki, sistem konfigürasyonu</td>
+                        <td>IT / Sistem Yöneticisi</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Slide 7: Tech -->
+    <section class="slide content-slide" data-slide="7">
+        <div class="slide-header">
+            <h2><span class="gradient-text">Teknik Altyapı</span></h2>
+            <p>Modern, güvenli ve ölçeklenebilir mimari</p>
+        </div>
+        <div class="grid-2">
+            <div class="table-wrapper">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td><strong>Platform</strong></td>
+                            <td>Web (Next.js 16)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Veritabanı</strong></td>
+                            <td>PostgreSQL</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Güvenlik</strong></td>
+                            <td>Rol bazlı erişim, şifreli oturum</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hosting</strong></td>
+                            <td>Bulut veya yerinde kurulum</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Entegrasyon</strong></td>
+                            <td>REST API desteği</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="card">
+                    <h3 style="color: #8b5cf6; margin-bottom: 12px;">🔒 Güvenlik</h3>
+                    <p>Her kullanıcı sadece yetkili olduğu verileri görür.</p>
+                </div>
+                <div class="card">
+                    <h3 style="color: #8b5cf6; margin-bottom: 12px;">⚡ Performans</h3>
+                    <p>Modern altyapı ile hızlı ve kesintisiz çalışma.</p>
+                </div>
+                <div class="card">
+                    <h3 style="color: #8b5cf6; margin-bottom: 12px;">🔧 Bakım</h3>
+                    <p>Düşük bakım maliyeti, kolay güncelleme.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 8: Next Steps -->
+    <section class="slide content-slide" data-slide="8">
+        <div class="slide-header">
+            <h2><span class="gradient-text">Sonraki Adımlar</span></h2>
+            <p>Hızlı geçiş planı</p>
+        </div>
+        <div class="grid-2">
+            <div>
+                <div class="checklist" style="gap: 32px;">
+                    <div class="check-item" style="font-size: 22px;">
+                        <span class="check-icon" style="width: 48px; height: 48px; font-size: 24px;">1</span>
+                        <div>
+                            <strong>Platform Hazır</strong>
+                            <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">Test ortamında kullanıma hazır
+                            </p>
+                        </div>
+                    </div>
+                    <div class="check-item" style="font-size: 22px;">
+                        <span class="check-icon" style="width: 48px; height: 48px; font-size: 24px;">2</span>
+                        <div>
+                            <strong>Pilot Birim Seçimi</strong>
+                            <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">Önerilen: Satınalma veya IT
+                                birimi</p>
+                        </div>
+                    </div>
+                    <div class="check-item" style="font-size: 22px;">
+                        <span class="check-icon" style="width: 48px; height: 48px; font-size: 24px;">3</span>
+                        <div>
+                            <strong>Kullanıcı Eğitimi</strong>
+                            <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">1-2 saatlik hızlı eğitim</p>
+                        </div>
+                    </div>
+                    <div class="check-item" style="font-size: 22px;">
+                        <span class="check-icon" style="width: 48px; height: 48px; font-size: 24px;">4</span>
+                        <div>
+                            <strong>Canlıya Geçiş</strong>
+                            <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">Kademeli geçiş ile risk
+                                minimizasyonu</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <div class="card feature-card" style="text-align: center; padding: 60px 40px;">
+                    <div class="icon" style="font-size: 80px; margin-bottom: 30px;">🎯</div>
+                    <h3 style="font-size: 28px; margin-bottom: 16px;">Hedef</h3>
+                    <p style="font-size: 18px;">2 hafta içinde pilot kullanım başlangıcı</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 9: CTA -->
+    <section class="slide cta-slide" data-slide="9">
+        <h2><span class="gradient-text">Canlı Demo</span></h2>
+        <p>Şimdi sistemi birlikte inceleyelim</p>
+        <div class="cta-buttons">
+            <a href="http://localhost:3000/login" target="_blank" class="btn btn-primary">🚀 Uygulamayı Aç</a>
+            <button class="btn btn-secondary" onclick="goToSlide(1)">↺ Başa Dön</button>
+        </div>
+    </section>
+
+    <!-- Slide 10: Thanks -->
+    <section class="slide cover" data-slide="10">
+        <div class="logo">PRU</div>
+        <h1>Teşekkürler</h1>
+        <h2>Sorularınız?</h2>
+        <p class="info" style="margin-top: 60px;">PRU Satınalma Platformu • Piri Reis Üniversitesi</p>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <button onclick="prevSlide()">←</button>
+        <div class="dots" id="dots"></div>
+        <span class="progress" id="progress">1 / 10</span>
+        <button onclick="nextSlide()">→</button>
+    </nav>
+
+    <div class="keyboard-hint">
+        <kbd>←</kbd> <kbd>→</kbd> veya <kbd>Space</kbd> tuşları ile gezinin
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+
+        function showSlide(n) {
+            if (n < 1) n = totalSlides;
+            if (n > totalSlides) n = 1;
+
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.querySelector(`[data-slide="${n}"]`).classList.add('active');
+
+            document.querySelectorAll('.dot').forEach((d, i) => {
+                d.classList.toggle('active', i === n - 1);
+            });
+
+            document.getElementById('progress').textContent = `${n} / ${totalSlides}`;
+            currentSlide = n;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function goToSlide(n) {
+            showSlide(n);
+        }
+
+        // Create dots
+        const dotsContainer = document.getElementById('dots');
+        for (let i = 1; i <= totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot' + (i === 1 ? ' active' : '');
+            dot.onclick = () => goToSlide(i);
+            dotsContainer.appendChild(dot);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+    </script>
+</body>
+
+</html>

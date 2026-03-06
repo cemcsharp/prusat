@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+:root {
+  /* Corporate Blue & Slate Palette */
+  --background: #f1f5f9;
+  --foreground: #0f172a;
+
+  --primary: #2563eb;
+  /* blue-600 */
+  --primary-hover: #1d4ed8;
+  --primary-foreground: #ffffff;
+
+  --secondary: #ffffff;
+  --secondary-foreground: #334155;
+
+  --accent: #3b82f6;
+  /* blue-500 */
+  --accent-foreground: #ffffff;
+
+  --border: #e2e8f0;
+  --input: #ffffff;
+  --ring: #3b82f6;
+  --radius: 12px;
+  /* Smoother corners */
+
+  --sidebar-bg: #0f172a;
+  --sidebar-border: rgba(255, 255, 255, 0.05);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Premium UI Components */
+.premium-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-card:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1), 0 4px 6px -2px rgba(37, 99, 235, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Standart UI Elements */
+.premium-button-primary {
+  @apply bg-blue-600 text-white px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/20 active:scale-95 transition-all;
+}
+
+.premium-button-secondary {
+  @apply bg-white text-slate-700 border border-slate-200 px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-slate-50 hover:border-blue-300 hover:text-blue-600 active:scale-95 transition-all;
+}
+
+.premium-button-danger {
+  @apply bg-rose-500 text-white px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-500/20 active:scale-95 transition-all;
+}
+
+.premium-input {
+  @apply w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5 transition-all;
+}
+
+.premium-badge {
+  @apply px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border;
+}
+
+.badge-blue {
+  @apply bg-blue-50 text-blue-600 border-blue-100;
+}
+
+.badge-emerald {
+  @apply bg-emerald-50 text-emerald-600 border-emerald-100;
+}
+
+.badge-amber {
+  @apply bg-amber-50 text-amber-600 border-amber-100;
+}
+
+.badge-rose {
+  @apply bg-rose-50 text-rose-600 border-rose-100;
+}
+
+.badge-slate {
+  @apply bg-slate-50 text-slate-600 border-slate-100;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  /* Global Bold Removal */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  strong,
+  b,
+  .font-bold,
+  .font-semibold,
+  .font-black {
+    font-weight: 600 !important;
+    /* Increased for better contrast/legibility */
+  }
+
+  /* Force normal for standard text */
+  p,
+  span,
+  td,
+  th,
+  label,
+  input,
+  select,
+  button {
+    font-weight: 400;
+  }
+
+  /* Premium Modern Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.2);
+    /* slate-500 with opacity */
+    border-radius: 20px;
+    transition: all 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(37, 99, 235, 0.4);
+    /* blue-600 with opacity */
+  }
+
+  /* Specific style for Sidebar / Dark Areas */
+  .bg-slate-950::-webkit-scrollbar-thumb,
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .bg-slate-950::-webkit-scrollbar-thumb:hover,
+  .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.4);
+  }
+
+  /* Firefox Support */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, 0.2) transparent;
+  }
+}
