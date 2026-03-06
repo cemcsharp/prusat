@@ -1424,22 +1424,40 @@ export async function getSystemNotifications() {
 
 export async function getDashboardStats() {
     await checkAuth(['ADMIN', 'SATINALMA', 'BIRIM'])
-    const [talepCount, activeOrdersCount, unpaidFaturaSum, expiringContractsCount] = await Promise.all([
+    const [talepCount, activeOrdersCount, faturalar, expiringContractsCount] = await Promise.all([
         prisma.talep.count(),
         prisma.siparis.count({ where: { durum: 'BEKLEMEDE' } }),
-        prisma.fatura.aggregate({
+        prisma.fatura.findMany({
             where: { odemeDurumu: 'ODENMEDI' },
-            _sum: { tutar: true }
+            select: {
+                tutar: true,
+                siparis: {
+                    select: {
+                        teklifKabul: {
+                            select: {
+                                paraBirimi: true
+                            }
+                        }
+                    }
+                }
+            }
         }),
         prisma.sozlesme.count({
             where: { bitisTarihi: { lte: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000) } }
         })
     ])
 
+    // Döviz bazlı toplamları hesapla
+    const borcMap: Record<string, number> = {}
+    faturalar.forEach(f => {
+        const paraBirimi = f.siparis?.teklifKabul?.paraBirimi || 'TRY'
+        borcMap[paraBirimi] = (borcMap[paraBirimi] || 0) + Number(f.tutar)
+    })
+
     return {
         talepHacmi: talepCount,
         aktifSiparis: activeOrdersCount,
-        toplamBorc: Number(unpaidFaturaSum._sum.tutar || 0),
+        toplamBorc: borcMap,
         kritikSozlesme: expiringContractsCount
     }
 }

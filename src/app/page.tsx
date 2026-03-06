@@ -15,7 +15,7 @@ export default function Dashboard() {
     const [stats, setStats] = useState({
         talepHacmi: 0,
         aktifSiparis: 0,
-        toplamBorc: 0,
+        toplamBorc: {} as Record<string, number>,
         kritikSozlesme: 0
     })
     const [recentActivities, setRecentActivities] = useState<any[]>([])
@@ -145,14 +145,25 @@ export default function Dashboard() {
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white text-xl shadow-lg shadow-purple-200">
                             💰
                         </div>
-                        <span className={`px-2 py-1 text-[10px] font-bold rounded-lg border uppercase ${stats.toplamBorc > 0 ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
-                            {stats.toplamBorc > 0 ? 'Kritik' : 'Temiz'}
+                        <span className={`px-2 py-1 text-[10px] font-bold rounded-lg border uppercase ${Object.keys(stats.toplamBorc).length > 0 ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                            {Object.keys(stats.toplamBorc).length > 0 ? 'Kritik' : 'Temiz'}
                         </span>
                     </div>
                     <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Toplam Yükümlülük</p>
-                    <h3 className="text-2xl font-black text-slate-800 mt-1">
-                        {loading ? '...' : new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(stats.toplamBorc)} <span className="text-xs font-medium text-slate-400">₺</span>
-                    </h3>
+                    <div className="flex flex-col gap-1 mt-1">
+                        {loading ? (
+                            <h3 className="text-2xl font-black text-slate-800">...</h3>
+                        ) : Object.keys(stats.toplamBorc).length > 0 ? (
+                            Object.entries(stats.toplamBorc).map(([currency, amount]) => (
+                                <h3 key={currency} className="text-2xl font-black text-slate-800 flex items-baseline gap-1.5">
+                                    {new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(amount)}
+                                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{currency === 'TRY' ? '₺' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency}</span>
+                                </h3>
+                            ))
+                        ) : (
+                            <h3 className="text-2xl font-black text-slate-800">0 <span className="text-xs font-medium text-slate-400">₺</span></h3>
+                        )}
+                    </div>
                 </div>
 
                 <div className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-xl transition-all group overflow-hidden relative">
