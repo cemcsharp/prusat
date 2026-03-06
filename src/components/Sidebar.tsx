@@ -19,20 +19,38 @@ export default function Sidebar({ isOpen, isCollapsed, onClose }: { isOpen?: boo
         ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
         : '??'
 
-    const menuItems = [
-        { href: '/', icon: '📊', label: 'Operasyonel Panel', roles: ['ADMIN', 'SATINALMA', 'BIRIM'] },
-        { href: '/talepler', icon: '📝', label: 'Satınalma Talepleri', roles: ['ADMIN', 'SATINALMA', 'BIRIM'] },
-        { href: '/rfq', icon: '📨', label: 'Teklif İstemleri (RFQ)', roles: ['ADMIN', 'SATINALMA'] },
-        { href: '/siparisler', icon: '⚙️', label: 'Sipariş Süreçleri', roles: ['ADMIN', 'SATINALMA'] },
-        { href: '/finans', icon: '💰', label: 'Finansal Kayıtlar', roles: ['ADMIN', 'SATINALMA'] },
-        { href: '/sozlesmeler', icon: '📜', label: 'Sözleşme & SLA', roles: ['ADMIN', 'SATINALMA'] },
-        { href: '/tedarikci', icon: '🤝', label: 'Tedarikçi İlişkileri', roles: ['ADMIN', 'SATINALMA'] },
-        { href: '/tedarikci/kategoriler', icon: '🏷️', label: 'Tedarikçi Kategorileri', roles: ['ADMIN', 'SATINALMA'] },
-        { href: '/tedarikci/kategori-onay', icon: '✅', label: 'Kategori Onayları', roles: ['ADMIN'] },
-        { href: '/raporlar', icon: '📈', label: 'Raporlama Paneli', roles: ['ADMIN', 'SATINALMA', 'BIRIM'] },
+    const menuGroups = [
+        {
+            title: 'Genel',
+            items: [
+                { href: '/', icon: '📊', label: 'Operasyonel Panel', roles: ['ADMIN', 'SATINALMA', 'BIRIM'] },
+                { href: '/raporlar', icon: '📈', label: 'Raporlama Paneli', roles: ['ADMIN', 'SATINALMA', 'BIRIM'] },
+            ]
+        },
+        {
+            title: 'Satınalma Süreçleri',
+            items: [
+                { href: '/talepler', icon: '📝', label: 'Satınalma Talepleri', roles: ['ADMIN', 'SATINALMA', 'BIRIM'] },
+                { href: '/rfq', icon: '📨', label: 'Teklif İstemleri (RFQ)', roles: ['ADMIN', 'SATINALMA'] },
+                { href: '/siparisler', icon: '⚙️', label: 'Sipariş Süreçleri', roles: ['ADMIN', 'SATINALMA'] },
+            ]
+        },
+        {
+            title: 'Finans & Hukuk',
+            items: [
+                { href: '/finans', icon: '💰', label: 'Finansal Kayıtlar', roles: ['ADMIN', 'SATINALMA'] },
+                { href: '/sozlesmeler', icon: '📜', label: 'Sözleşme & SLA', roles: ['ADMIN', 'SATINALMA'] },
+            ]
+        },
+        {
+            title: 'Tedarikçi Yönetimi',
+            items: [
+                { href: '/tedarikci', icon: '🤝', label: 'Tedarikçi İlişkileri', roles: ['ADMIN', 'SATINALMA'] },
+                { href: '/tedarikci/kategoriler', icon: '🏷️', label: 'Tedarikçi Kategorileri', roles: ['ADMIN', 'SATINALMA'] },
+                { href: '/tedarikci/kategori-onay', icon: '✅', label: 'Kategori Onayları', roles: ['ADMIN'] },
+            ]
+        }
     ]
-
-    const filteredMenuItems = menuItems.filter(item => item.roles.includes(user?.role || ''))
 
     const sidebarClass = `
         fixed lg:sticky top-0 left-0 z-50 h-screen transition-all duration-300 ease-in-out bg-slate-950 border-r border-white/5 p-4 
@@ -71,12 +89,7 @@ export default function Sidebar({ isOpen, isCollapsed, onClose }: { isOpen?: boo
             </div>
 
             {/* Navigation */}
-            <nav className="flex flex-col gap-1 overflow-y-auto flex-1 pr-2 sidebar-scroll">
-                {(!isCollapsed || isOpen) && (
-                    <div className="text-[9px] text-slate-400 uppercase tracking-widest mb-3 px-2 font-medium animate-in fade-in duration-300">Ana Kontrol Paneli</div>
-                )}
-
-                {/* Hydration & Loading Guard */}
+            <nav className="flex flex-col gap-6 overflow-y-auto flex-1 pr-2 sidebar-scroll">
                 {!mounted || status === 'loading' || (status === 'authenticated' && !user?.role) ? (
                     <div className="flex flex-col gap-2 px-2 animate-pulse">
                         {[1, 2, 3, 4, 5, 6].map(i => (
@@ -84,30 +97,46 @@ export default function Sidebar({ isOpen, isCollapsed, onClose }: { isOpen?: boo
                         ))}
                     </div>
                 ) : (
-                    filteredMenuItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            title={isCollapsed && !isOpen ? item.label : ''}
-                            onClick={onClose}
-                            className={`group flex items-center ${isCollapsed && !isOpen ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded transition-all duration-200 ${pathname === item.href
-                                ? 'bg-white/5 text-white shadow-inner border border-white/5'
-                                : 'text-slate-300 hover:bg-white/5 hover:text-slate-100'
-                                }`}
-                        >
-                            <span className={`text-[12px] opacity-70 group-hover:opacity-100 transition-opacity ${pathname === item.href ? 'opacity-100' : ''}`}>
-                                {item.icon}
-                            </span>
-                            {(!isCollapsed || isOpen) && (
-                                <span className="text-[11px] font-medium tracking-wide uppercase whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
-                                    {item.label}
-                                </span>
-                            )}
-                            {pathname === item.href && (!isCollapsed || isOpen) && (
-                                <div className="ml-auto w-1 h-3 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50 animate-pulse"></div>
-                            )}
-                        </Link>
-                    ))
+                    menuGroups.map((group, groupIdx) => {
+                        const filteredItems = group.items.filter(item => item.roles.includes(user?.role || ''))
+                        if (filteredItems.length === 0) return null
+
+                        return (
+                            <div key={groupIdx} className="flex flex-col gap-1">
+                                {(!isCollapsed || isOpen) && (
+                                    <div className="text-[9px] text-slate-500 uppercase tracking-widest mb-1 px-3 font-bold opacity-80">
+                                        {group.title}
+                                    </div>
+                                )}
+                                <div className="flex flex-col gap-0.5">
+                                    {filteredItems.map((item) => (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            title={isCollapsed && !isOpen ? item.label : ''}
+                                            onClick={onClose}
+                                            className={`group flex items-center ${isCollapsed && !isOpen ? 'justify-center px-0' : 'gap-3 px-3'} py-2 rounded transition-all duration-200 ${pathname === item.href
+                                                ? 'bg-white/5 text-white shadow-inner border border-white/5'
+                                                : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
+                                                }`}
+                                        >
+                                            <span className={`text-[12px] opacity-70 group-hover:opacity-100 transition-opacity ${pathname === item.href ? 'opacity-100' : ''}`}>
+                                                {item.icon}
+                                            </span>
+                                            {(!isCollapsed || isOpen) && (
+                                                <span className="text-[11px] font-medium tracking-wide uppercase whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
+                                                    {item.label}
+                                                </span>
+                                            )}
+                                            {pathname === item.href && (!isCollapsed || isOpen) && (
+                                                <div className="ml-auto w-1 h-3 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50"></div>
+                                            )}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        )
+                    })
                 )}
             </nav>
 
